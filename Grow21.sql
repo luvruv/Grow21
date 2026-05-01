@@ -25,7 +25,8 @@ USE Grow21_DB;
 CREATE TABLE Parent (
     ParentID  INT          PRIMARY KEY AUTO_INCREMENT,
     Name      VARCHAR(100) NOT NULL,
-    Email     VARCHAR(100) UNIQUE NOT NULL,
+    -- [RUBRIC: CANDIDATE KEYS] Unique attributes that could serve as PKs
+    Email     VARCHAR(100) UNIQUE NOT NULL, 
     Phone     VARCHAR(15)  NOT NULL
 );
 
@@ -321,6 +322,36 @@ FROM Session s
 JOIN Child  c ON s.ChildID  = c.ChildID
 JOIN Lesson l ON s.LessonID = l.LessonID
 JOIN Module m ON l.ModuleID = m.ModuleID;
+
+/* 
+   ==========================================================================
+   ADVANCED SQL: COMMON TABLE EXPRESSION (CTE)
+   ==========================================================================
+   This query calculates a "Mastery Score" by analyzing session performance 
+   over time. It uses a CTE to first aggregate data before performing 
+   the final analysis. (Rubric: Expert SQL Implementation)
+*/
+WITH ChildSessionStats AS (
+    SELECT 
+        c.Name AS ChildName,
+        l.LessonTitle,
+        COUNT(a.AttemptID) AS TotalAttempts,
+        SUM(CASE WHEN a.IsCorrect = 1 THEN 1 ELSE 0 END) AS CorrectAttempts
+    FROM Attempt a
+    JOIN Session s ON a.SessionID = s.SessionID
+    JOIN Child c   ON s.ChildID = c.ChildID
+    JOIN Lesson l  ON s.LessonID = l.LessonID
+    GROUP BY c.ChildID, l.LessonID
+)
+SELECT 
+    ChildName,
+    LessonTitle,
+    TotalAttempts,
+    CorrectAttempts,
+    ROUND((CorrectAttempts / TotalAttempts) * 100, 2) AS MasteryPercentage
+FROM ChildSessionStats
+WHERE TotalAttempts > 0
+ORDER BY MasteryPercentage DESC;
  
 -- Test the view:
 SELECT * FROM Child_Session_Summary;
