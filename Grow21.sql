@@ -525,6 +525,13 @@ SELECT * FROM School;   -- Test School is GONE
    the same child's baseline skill level at the exact same time.
    This ensures data consistency and prevents race conditions.
 */
+-- Step 0: RESET DATA (Run this once before showing your teacher to reset Riya back to Intermediate!)
+UPDATE Child SET BaselineSkillLevel = 'Intermediate' WHERE ChildID = 2;
+
+-- Step 1: Check the current skill level (Look at Riya Mehta - it should be 'Intermediate')
+SELECT * FROM Child WHERE ChildID = 2;
+
+-- Step 2: Start a transaction to lock and update the row safely
 START TRANSACTION;
 
 -- Lock the specific row for 'Riya Mehta' so no other transaction can modify it until we commit
@@ -540,6 +547,9 @@ WHERE ChildID = 2;
 -- Release the lock and save changes
 COMMIT;
 
+-- Step 3: Check the skill level after the locked transaction (Look at Riya Mehta - it is now securely 'Advanced'!)
+SELECT * FROM Child WHERE ChildID = 2;
+
 /* 
    ==========================================================================
    EFFICIENCY & OPTIMIZATION DEMONSTRATION (EXPLAIN & INDEXING)
@@ -551,6 +561,9 @@ COMMIT;
    
    Scenario: Searching for lessons by TargetSkill can be slow if the table grows large.
 */
+-- Step 0: RESET INDEX (Run this once before showing your teacher to reset it!)
+-- (Note: If it gives an error, it just means the index is already deleted, which is fine)
+ALTER TABLE Lesson DROP INDEX idx_lesson_targetskill;
 
 -- Step 1: Analyze query performance BEFORE indexing
 -- (agar ye cheez nhi hoti toh kya horha hota - Full Table Scan)
@@ -558,7 +571,7 @@ EXPLAIN SELECT * FROM Lesson WHERE TargetSkill = 'Word Formation';
 -- Without an index, the database performs a "Full Table Scan" (type = ALL).
 -- This means it checks every single row, which is inefficient for large datasets.
 
--- Step 2: Create an Index to optimize the query
+-- Step 2: Create an Index to o`ptimize the query
 -- (agar ye code likha hai toh ab kam time lag rha hai)
 CREATE INDEX idx_lesson_targetskill ON Lesson(TargetSkill);
 
