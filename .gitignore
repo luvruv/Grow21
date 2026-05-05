@@ -1,0 +1,23 @@
+# Environment / secrets
+.env
+.env.local
+*.env
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Android / Gradle build output
+user-app/.gradle/
+user-app/.idea/
+user-app/app/build/
+user-app/build/
+user-app/local.properties
+
+# Vite / React build output
+frontend/dist/
+frontend/.vite/
+
+# OS
+Thumbs.db
+.DS_Store

@@ -30,7 +30,11 @@ router.post('/sessions', apiController.addSession);
 router.get('/progress/:childId', apiController.getProgressByChild);
 router.get('/progress/report/:childId', apiController.callProgressStoredProcedure);
 
-// 6. App Sync
+// 6. Feedback (teacher reviews)
+router.get('/feedback/:childId', apiController.getFeedbackForChild);
+router.post('/feedback', apiController.addFeedback);
+
+// 7. App Sync
 router.post('/app-sync', apiController.appSession);
 
 module.exports = router;

@@ -1,72 +1,69 @@
+require('dotenv').config({ path: require('path').resolve(__dirname, '..', '.env') });
+
 const fs = require('fs');
+const path = require('path');
 const mysql = require('mysql2');
 
+const sslEnabled = String(process.env.DB_SSL || '').toLowerCase() === 'true';
+
+// Default to the cloud-init script at project root; override with: node apply_sql.js <path>
+const sqlPath = path.resolve(__dirname, '..', process.argv[2] || 'Grow21_Cloud_Init.sql');
+
 const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'bhavya',
-  multipleStatements: true
+  host:     process.env.DB_HOST,
+  port:     Number(process.env.DB_PORT) || 3306,
+  user:     process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  multipleStatements: true,
+  ...(sslEnabled ? { ssl: { rejectUnauthorized: false } } : {})
 });
 
 connection.connect((err) => {
   if (err) throw err;
-  console.log('Connected to MySQL server.');
-  
-  // Drop DB if exists
-  connection.query('DROP DATABASE IF EXISTS Grow21_DB;', (err) => {
-    if (err) throw err;
-    console.log('Database dropped.');
-    
-    // Read SQL file
-    let sqlScript = fs.readFileSync('c:/Grow21/Grow21_DBMS_Complete.sql', 'utf8');
-    
-    // We need to split the script into parts separated by DELIMITER //
-    // mysql2 multipleStatements does not support DELIMITER keyword
-    const parts = sqlScript.split('DELIMITER //');
-    
-    let queriesToRun = [];
-    
-    // First part is regular SQL with ;
-    queriesToRun.push(parts[0]);
-    
-    // Subsequent parts contain procedures ending with //, and then DELIMITER ;
-    for (let i = 1; i < parts.length; i++) {
-        const subParts = parts[i].split('DELIMITER ;');
-        // subParts[0] contains the SPs separated by //
-        const sps = subParts[0].split('//').map(s => s.trim()).filter(s => s.length > 0);
-        queriesToRun.push(...sps);
-        
-        if (subParts.length > 1) {
-            queriesToRun.push(subParts[1]); // the rest of the script
-        }
+  console.log(`Connected to MySQL: ${process.env.DB_NAME} @ ${process.env.DB_HOST}`);
+  console.log(`Applying SQL from: ${sqlPath}`);
+
+  const sqlScript = fs.readFileSync(sqlPath, 'utf8');
+
+  // mysql2's multipleStatements does not understand the DELIMITER directive,
+  // so split out procedure bodies and run each as a single statement.
+  const parts = sqlScript.split('DELIMITER //');
+  const queriesToRun = [];
+
+  queriesToRun.push(parts[0]);
+
+  for (let i = 1; i < parts.length; i++) {
+    const subParts = parts[i].split('DELIMITER ;');
+    const sps = subParts[0].split('//').map(s => s.trim()).filter(s => s.length > 0);
+    queriesToRun.push(...sps);
+
+    if (subParts.length > 1) {
+      queriesToRun.push(subParts[1]);
     }
-    
-    // Execute sequentially
-    let currentIdx = 0;
-    function runNext() {
-        if (currentIdx >= queriesToRun.length) {
-            console.log('Database recreated successfully from script.');
-            process.exit(0);
-        }
-        
-        let q = queriesToRun[currentIdx].trim();
-        if (!q) {
-            currentIdx++;
-            runNext();
-            return;
-        }
-        
-        connection.query(q, (err) => {
-            if (err) {
-                console.error('Error executing query at index ' + currentIdx + ': ' + err.message);
-                console.error(q.substring(0, 100) + '...');
-                process.exit(1);
-            }
-            currentIdx++;
-            runNext();
-        });
+  }
+
+  let currentIdx = 0;
+  function runNext() {
+    if (currentIdx >= queriesToRun.length) {
+      console.log('Database initialized successfully.');
+      process.exit(0);
     }
-    
-    runNext();
-  });
+    const q = queriesToRun[currentIdx].trim();
+    if (!q) {
+      currentIdx++;
+      return runNext();
+    }
+    connection.query(q, (err) => {
+      if (err) {
+        console.error(`Error at chunk ${currentIdx}: ${err.message}`);
+        console.error(q.substring(0, 200) + (q.length > 200 ? '...' : ''));
+        process.exit(1);
+      }
+      currentIdx++;
+      runNext();
+    });
+  }
+
+  runNext();
 });

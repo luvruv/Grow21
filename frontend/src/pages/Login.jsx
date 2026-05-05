@@ -2,44 +2,31 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const Login = ({ onLogin }) => {
-  const [step, setStep] = useState('school'); // 'school', 'role', 'login', 'forgot', 'reset'
-  const [selectedSchool, setSelectedSchool] = useState(null);
+  const [step, setStep] = useState('role'); // 'role', 'login', 'forgot', 'reset'
   const [selectedRole, setSelectedRole] = useState(null);
-  
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  
+
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
-
-  const handleSchoolSelect = (school) => {
-    setSelectedSchool(school);
-    setStep('role');
-    setError('');
-  };
 
   const handleRoleSelect = (role) => {
     setSelectedRole(role);
     setStep('login');
     setError('');
-    
-    // Pre-fill demo credentials based on School and Role
+
+    // Demo credentials per role (kept for the viva walkthrough).
     if (role === 'Admin') {
       setEmail('admin@grow21.com');
       setPassword('admin123');
-    } else if (selectedSchool === 'Delhi Public School') {
-      if (role === 'Teacher') setEmail('ananya@school.com');
-      else if (role === 'Parent') setEmail('sunita@gmail.com');
+    } else if (role === 'Teacher') {
+      setEmail('ananya@school.com');
       setPassword('pass123');
-    } else if (selectedSchool === 'Ryan International') {
-      if (role === 'Teacher') setEmail('vikram@school.com');
-      else if (role === 'Parent') setEmail('rakesh@gmail.com');
-      setPassword('pass123');
-    } else if (selectedSchool === 'Sanskriti School') {
-      if (role === 'Teacher') setEmail('deepa@school.com'); // Though Deepa is in DPS, we'll use her here or just priya
-      else if (role === 'Parent') setEmail('priya@gmail.com');
+    } else if (role === 'Parent') {
+      setEmail('sunita@gmail.com');
       setPassword('pass123');
     } else {
       setEmail('');
@@ -125,42 +112,10 @@ const Login = ({ onLogin }) => {
     }
   };
 
-  const renderSchoolSelection = () => (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh', flexDirection: 'column' }}>
-      <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-        <h1 style={{ fontSize: '3rem', color: 'var(--primary-color)', marginBottom: '0.5rem', fontWeight: 800 }}>Grow21</h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem' }}>Select your organization</p>
-      </div>
-      <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-        {['Delhi Public School', 'Ryan International', 'Sanskriti School'].map(school => (
-          <div 
-            key={school}
-            onClick={() => handleSchoolSelect(school)}
-            className="card"
-            style={{ 
-              width: '220px', height: '140px', 
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer', transition: 'all 0.2s', textAlign: 'center',
-              backgroundColor: 'var(--card-bg)'
-            }}
-          >
-            <span style={{ fontSize: '1.1rem', fontWeight: 600 }}>{school}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
   const renderRoleSelection = () => (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh', flexDirection: 'column', position: 'relative' }}>
-      <button 
-        onClick={() => setStep('school')}
-        style={{ position: 'absolute', top: '2rem', left: '2rem', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '1.1rem' }}
-      >
-        &larr; Back
-      </button>
       <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-        <h1 style={{ fontSize: '2rem', color: 'var(--primary-color)', marginBottom: '0.5rem', fontWeight: 800 }}>{selectedSchool}</h1>
+        <h1 style={{ fontSize: '3rem', color: 'var(--primary-color)', marginBottom: '0.5rem', fontWeight: 800 }}>Grow21</h1>
         <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem' }}>Who is logging in?</p>
       </div>
       
@@ -206,7 +161,6 @@ const Login = ({ onLogin }) => {
         
         <div style={{ textAlign: 'center', marginBottom: '2rem', marginTop: '2rem' }}>
           <h2 style={{ marginBottom: '0.5rem' }}>{selectedRole} Login</h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>{selectedSchool}</p>
         </div>
 
         {error && <div style={{ backgroundColor: 'rgba(248, 113, 113, 0.1)', color: '#F87171', padding: '0.75rem', borderRadius: '4px', marginBottom: '1.5rem', border: '1px solid rgba(248, 113, 113, 0.2)', textAlign: 'center' }}>{error}</div>}
@@ -305,7 +259,6 @@ const Login = ({ onLogin }) => {
 
   return (
     <>
-      {step === 'school' && renderSchoolSelection()}
       {step === 'role' && renderRoleSelection()}
       {step === 'login' && renderLoginForm()}
       {step === 'forgot' && renderForgotPassword()}
