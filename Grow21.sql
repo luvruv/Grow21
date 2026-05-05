@@ -516,3 +516,54 @@ ROLLBACK;
 -- Verify rollback worked:
 SELECT * FROM School;   -- Test School is GONE
 
+/* 
+   ==========================================================================
+   LOCKING MECHANISM DEMONSTRATION
+   ==========================================================================
+   Here we demonstrate a pessimistic lock using SELECT ... FOR UPDATE.
+   This is useful when multiple users (e.g. educators) might try to update 
+   the same child's baseline skill level at the exact same time.
+   This ensures data consistency and prevents race conditions.
+*/
+START TRANSACTION;
+
+-- Lock the specific row for 'Riya Mehta' so no other transaction can modify it until we commit
+SELECT * FROM Child 
+WHERE ChildID = 2 
+FOR UPDATE;
+
+-- Update the skill level
+UPDATE Child 
+SET BaselineSkillLevel = 'Advanced' 
+WHERE ChildID = 2;
+
+-- Release the lock and save changes
+COMMIT;
+
+/* 
+   ==========================================================================
+   EFFICIENCY & OPTIMIZATION DEMONSTRATION (EXPLAIN & INDEXING)
+   ==========================================================================
+   To show how our program is efficient, we demonstrate query execution plans
+   before and after adding a specific index. This shows that adding this code
+   significantly reduces the time taken to fetch results (hence becoming efficient),
+   and shows what would happen if it wasn't there (full table scan).
+   
+   Scenario: Searching for lessons by TargetSkill can be slow if the table grows large.
+*/
+
+-- Step 1: Analyze query performance BEFORE indexing
+-- (agar ye cheez nhi hoti toh kya horha hota - Full Table Scan)
+EXPLAIN SELECT * FROM Lesson WHERE TargetSkill = 'Word Formation';
+-- Without an index, the database performs a "Full Table Scan" (type = ALL).
+-- This means it checks every single row, which is inefficient for large datasets.
+
+-- Step 2: Create an Index to optimize the query
+-- (agar ye code likha hai toh ab kam time lag rha hai)
+CREATE INDEX idx_lesson_targetskill ON Lesson(TargetSkill);
+
+-- Step 3: Analyze query performance AFTER indexing
+EXPLAIN SELECT * FROM Lesson WHERE TargetSkill = 'Word Formation';
+-- With the index, the database uses an "Index Scan" (type = ref).
+-- It directly finds the relevant rows, drastically reducing execution time and making the system highly efficient!
+
