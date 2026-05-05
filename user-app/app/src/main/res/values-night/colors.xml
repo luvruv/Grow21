@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark mode adapted pastels (desaturated or darker equivalents for better contrast on dark surfaces) -->
+    <color name="colorPastelPink">#A05A5A</color>
+    <color name="colorPastelGreen">#5A9E72</color>
+    <color name="colorPastelYellow">#A0893F</color>
+    <color name="colorLightPurple">#614D66</color>
+    
+    <!-- We can override any specific colors here if needed, but standard elements now use theme attributes like ?android:attr/windowBackground -->
+    <color name="colorCardBorder">#333333</color>
+</resources>

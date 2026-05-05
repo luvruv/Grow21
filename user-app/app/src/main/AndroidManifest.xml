@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <application
+        android:name=".Grow21Application"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
+        android:theme="@style/Theme.Grow21">
+
+        <activity
+            android:name=".LoginActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".ProfileChooserActivity" android:exported="false" />
+        <activity android:name=".ChildSetupActivity" android:exported="false" />
+        <activity android:name=".SignupActivity" android:exported="false" />
+        <activity android:name=".StartActivity" android:exported="false" />
+        <activity android:name=".SkillSelectionActivity" android:exported="false" />
+        <activity android:name=".TapGameActivity" android:exported="false" />
+        <activity android:name=".DragGameActivity" android:exported="false" />
+        <activity android:name=".MotorGameActivity" android:exported="false" />
+        <activity android:name=".MovePlaySelectionActivity" android:exported="false" />
+        <activity android:name=".ProgressActivity" android:exported="false" />
+        <activity android:name=".SettingsActivity" android:exported="false" />
+        <activity android:name=".ParentDashboardActivity" android:exported="false" />
+        <activity android:name=".MemoryGameActivity" android:exported="false" />
+
+        <activity
+            android:name=".PuzzleSelectionActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ColorSortActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".MemoryFlipActivity"
+            android:exported="false" />
+
+    </application>
+
+</manifest>

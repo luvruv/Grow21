@@ -1,0 +1,248 @@
+[
+  {
+    "id": "q1",
+    "type": "tap",
+    "category": "vocabulary",
+    "question": "What is this?",
+    "image": "book",
+    "options": ["Table", "Cat", "Book", "Pencil"],
+    "answer": "Book"
+  },
+  {
+    "id": "q2",
+    "type": "tap",
+    "category": "vocabulary",
+    "question": "What is this?",
+    "image": "apple",
+    "options": ["Apple", "Ball", "Car"],
+    "answer": "Apple"
+  },
+  {
+    "id": "q10",
+    "type": "tap",
+    "category": "vocabulary",
+    "question": "What is this?",
+    "image": "car",
+    "options": ["Bus", "Train", "Car", "Bicycle"],
+    "answer": "Car"
+  },
+  {
+    "id": "q11",
+    "type": "tap",
+    "category": "vocabulary",
+    "question": "What is this?",
+    "image": "sun",
+    "options": ["Moon", "Star", "Sun", "Cloud"],
+    "answer": "Sun"
+  },
+  {
+    "id": "q12",
+    "type": "tap",
+    "category": "vocabulary",
+    "question": "What is this?",
+    "image": "cat",
+    "options": ["Dog", "Cat", "Mouse", "Rabbit"],
+    "answer": "Cat"
+  },
+  {
+    "id": "q13",
+    "type": "tap",
+    "category": "vocabulary",
+    "question": "What is this?",
+    "image": "tree",
+    "options": ["Flower", "Tree", "Bush", "Grass"],
+    "answer": "Tree"
+  },
+  {
+    "id": "q3",
+    "type": "tap",
+    "category": "colors",
+    "question": "Which color is this?",
+    "image": "bg_pastel_blob_pink",
+    "options": ["bg_pastel_blob_pink", "bg_pastel_blob_green", "bg_pastel_triangle_yellow"],
+    "answer": "bg_pastel_blob_pink"
+  },
+  {
+    "id": "q4",
+    "type": "tap",
+    "category": "emotions",
+    "question": "How does this face feel?",
+    "image": "happy_face",
+    "options": ["Happy", "Sad", "Angry", "Scared"],
+    "answer": "Happy",
+    "audio": "happy_sound"
+  },
+  {
+    "id": "q5",
+    "type": "tap",
+    "category": "sounds",
+    "question": "Which animal makes this sound?",
+    "image": "bg_play_icon_circle",
+    "options": ["Dog", "Cat", "Cow", "Bird"],
+    "answer": "Dog",
+    "audio": "dog_bark"
+  },
+  {
+    "id": "q6",
+    "type": "drag_match",
+    "category": "shapes",
+    "question": "Drag the matching shape",
+    "image": "shape_heart",
+    "options": ["shape_circle", "shape_heart", "shape_triangle"],
+    "answer": "shape_heart"
+  },
+  {
+    "id": "q7",
+    "type": "drag_match",
+    "category": "sorting",
+    "question": "Sort: Drag the blue shape",
+    "image": "shape_square",
+    "options": ["shape_star", "shape_pentagon", "shape_diamond", "shape_square"],
+    "answer": "shape_square"
+  },
+
+  {
+    "id": "m1",
+    "type": "motor",
+    "category": "trace",
+    "subtype": "line",
+    "pathType": "straight",
+    "question": "Trace the straight line",
+    "image": "",
+    "options": [],
+    "answer": "completed"
+  },
+  {
+    "id": "m2",
+    "type": "motor",
+    "category": "trace",
+    "subtype": "line",
+    "pathType": "curve",
+    "question": "Trace the curve",
+    "image": "",
+    "options": [],
+    "answer": "completed"
+  },
+  {
+    "id": "m3",
+    "type": "motor",
+    "category": "trace",
+    "subtype": "line",
+    "pathType": "zigzag",
+    "question": "Trace the zigzag",
+    "image": "",
+    "options": [],
+    "answer": "completed"
+  },
+  {
+    "id": "m4",
+    "type": "motor",
+    "category": "draw",
+    "subtype": "shape",
+    "shape": "circle",
+    "question": "Draw a circle",
+    "image": "",
+    "options": [],
+    "answer": "completed"
+  },
+  {
+    "id": "m5",
+    "type": "motor",
+    "category": "draw",
+    "subtype": "shape",
+    "shape": "square",
+    "question": "Draw a square",
+    "image": "",
+    "options": [],
+    "answer": "completed"
+  },
+  {
+    "id": "m6",
+    "type": "motor",
+    "category": "draw",
+    "subtype": "shape",
+    "shape": "triangle",
+    "question": "Draw a triangle",
+    "image": "",
+    "options": [],
+    "answer": "completed"
+  },
+  {
+    "id": "m10",
+    "type": "motor",
+    "category": "free",
+    "subtype": "free",
+    "question": "Free draw! Draw anything you like!",
+    "image": "",
+    "options": [],
+    "answer": "completed"
+  },
+  {
+    "id": "m11",
+    "type": "motor",
+    "category": "free",
+    "subtype": "free",
+    "question": "Draw your favorite animal!",
+    "image": "",
+    "options": [],
+    "answer": "completed"
+  },
+  {
+    "id": "m12",
+    "type": "motor",
+    "category": "free",
+    "subtype": "free",
+    "question": "Draw a happy face!",
+    "image": "",
+    "options": [],
+    "answer": "completed"
+  },
+
+  {
+    "id": "cs1",
+    "type": "color_sort",
+    "category": "puzzle",
+    "subtype": "color_sort",
+    "question": "Sort by color!",
+    "image": "",
+    "options": [],
+    "answer": "completed",
+    "colors": ["red", "blue", "yellow"],
+    "items": ["🍎 Apple:red", "🐟 Fish:blue", "⭐ Star:yellow", "❤️ Heart:red", "💧 Water:blue", "🍌 Banana:yellow"]
+  },
+  {
+    "id": "cs2",
+    "type": "color_sort",
+    "category": "puzzle",
+    "subtype": "color_sort",
+    "question": "Put each item in the right box!",
+    "image": "",
+    "options": [],
+    "answer": "completed",
+    "colors": ["red", "blue", "yellow"],
+    "items": ["🍓 Berry:red", "🦋 Butterfly:blue", "☀️ Sun:yellow", "🌹 Rose:red"]
+  },
+
+  {
+    "id": "mf1",
+    "type": "memory",
+    "category": "puzzle",
+    "subtype": "memory",
+    "question": "Find the matching pairs!",
+    "image": "",
+    "options": [],
+    "answer": "completed",
+    "pairs": ["🐱 Cat", "🐶 Dog"]
+  },
+  {
+    "id": "mf2",
+    "type": "memory",
+    "category": "puzzle",
+    "subtype": "memory",
+    "question": "Match the cards!",
+    "image": "",
+    "options": [],
+    "answer": "completed",
+    "pairs": ["🌸 Flower", "⭐ Star", "🐟 Fish"]
+  }
+]

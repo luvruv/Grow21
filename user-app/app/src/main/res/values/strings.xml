@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Grow21</string>
+
+    <!-- Start Screen -->
+    <string name="title_grow21">Grow21</string>
+    <string name="subtitle_fun_learning">Fun Learning</string>
+    <string name="greeting_format">Hi %1$s! 👋</string>
+    <string name="btn_start">START</string>
+
+    <!-- Login Screen -->
+    <string name="title_login">Welcome to Grow21</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Password</string>
+    <string name="btn_login">LOGIN</string>
+    <string name="error_login_failed">Login failed. Please check your credentials.</string>
+    <string name="error_empty_fields">Please fill in all fields.</string>
+    <string name="logging_in">Logging in…</string>
+    <string name="link_no_account">Don\'t have an account? Sign Up</string>
+    <string name="link_have_account">Already have an account? Login</string>
+
+    <!-- Signup Screen -->
+    <string name="title_signup">Create Account</string>
+    <string name="hint_confirm_password">Confirm Password</string>
+    <string name="btn_signup">SIGN UP</string>
+    <string name="error_passwords_mismatch">Passwords do not match.</string>
+    <string name="error_email_exists">An account with this email already exists.</string>
+    <string name="error_password_short">Password must be at least 4 characters.</string>
+    <string name="signup_success">Account created! Please login.</string>
+
+    <!-- Child Setup Screen -->
+    <string name="title_child_setup">Tell us about your child</string>
+    <string name="hint_child_name">Child\'s Name</string>
+    <string name="label_age">Age</string>
+    <string name="btn_save">SAVE</string>
+    <string name="error_name_empty">Please enter child\'s name.</string>
+    <string name="error_age_invalid">Age must be between 3 and 18.</string>
+    <string name="label_select_avatar">Select an avatar</string>
+
+    <!-- Skill Selection Screen -->
+    <string name="title_skill_selection">Let\'s start learning</string>
+    <string name="skill_move_play">Move &amp; Play</string>
+    <string name="skill_vocabulary">Vocabulary</string>
+    <string name="skill_puzzles">Puzzles</string>
+
+    <!-- Bottom Navigation -->
+    <string name="nav_menu">Menu</string>
+    <string name="nav_module">Module</string>
+    <string name="nav_report">Report</string>
+    <string name="nav_profile">Profile</string>
+
+    <!-- Tap Game Screen -->
+    <string name="question_default">What is this?</string>
+    <string name="label_hearts">❤</string>
+
+    <!-- Reward Dialog -->
+    <string name="reward_correct_title">Great Job! ⭐</string>
+    <string name="reward_wrong_title">Good Try! 💪</string>
+    <string name="reward_correct_message">You got it right! Keep going!</string>
+    <string name="reward_wrong_message_format">The correct answer is %1$s</string>
+    <string name="btn_next">NEXT</string>
+    <string name="btn_finish">FINISH</string>
+
+    <!-- Game Over -->
+    <string name="game_over_title">Game Over</string>
+    <string name="game_over_message">You ran out of hearts! Try again?</string>
+    <string name="btn_try_again">TRY AGAIN</string>
+    <string name="btn_go_back">GO BACK</string>
+
+    <!-- Progress Screen -->
+    <string name="title_progress">Your Progress</string>
+    <string name="progress_format">%1$d / %2$d correct</string>
+    <string name="accuracy_format">%1$.0f%% accuracy</string>
+    <string name="empty_progress">No progress data yet. Play some games!</string>
+
+    <!-- Settings Screen -->
+    <string name="title_settings">Settings</string>
+    <string name="setting_voice_instructions">Voice Instructions</string>
+    <string name="setting_sound_effects">Sound Effects</string>
+    <string name="setting_large_text">Large Text Mode</string>
+
+    <!-- Session Complete -->
+    <string name="session_complete_title">Session Complete!</string>
+    <string name="session_complete_format">You scored %1$d out of %2$d</string>
+
+    <!-- Profile Switcher -->
+    <string name="label_child_mode">Child</string>
+    <string name="label_parent_mode">Parent</string>
+    <string name="content_desc_profile_switch">Switch between Child and Parent profile</string>
+
+    <!-- Parent Dashboard -->
+    <string name="title_parent_dashboard">Parent Dashboard</string>
+    <string name="title_streak_calendar">Activity Streak</string>
+    <string name="title_progress_report">Progress Report</string>
+    <string name="streak_format">&#x1F525; %1$d-day streak</string>
+    <string name="streak_zero">No streak yet — let\'s start!</string>
+    <string name="total_attempted_format">%1$d questions attempted</string>
+    <string name="overall_accuracy_format">%.0f%% overall accuracy</string>
+    <string name="empty_calendar">No activity recorded this month.</string>
+    <string name="child_name_format">%1$s\'s Learning Journey</string>
+
+    <!-- Parent Auth Dialog -->
+    <string name="dialog_parent_auth_title">Parent Verification</string>
+    <string name="dialog_parent_auth_message">Enter your account password to switch to Parent mode.</string>
+    <string name="hint_enter_password">Password</string>
+    <string name="btn_confirm">CONFIRM</string>
+    <string name="btn_cancel">CANCEL</string>
+    <string name="error_wrong_password">Incorrect password. Please try again.</string>
+
+    <!-- Logout -->
+    <string name="btn_logout">LOGOUT</string>
+    <string name="dialog_logout_title">Logout</string>
+    <string name="dialog_logout_message">Are you sure you want to log out?</string>
+
+    <string name="tap_instruction">Tap the correct object</string>
+</resources>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Design System -->
+    <color name="colorPrimary">#7B61FF</color>
+    <color name="colorPrimaryDark">#5A3FD6</color>
+    <color name="colorPrimaryLight">#B8A9FF</color>
+    <color name="colorSecondary">#FF8A65</color>
+    <color name="colorSecondaryLight">#FFB899</color>
+    <color name="colorAccent">#4DB6AC</color>
+    <color name="colorAccentLight">#80CBC4</color>
+
+    <!-- Game State Colors -->
+    <color name="colorCorrect">#66BB6A</color>
+    <color name="colorCorrectLight">#C8E6C9</color>
+    <color name="colorWrong">#EF5350</color>
+    <color name="colorWrongLight">#FFCDD2</color>
+    <color name="colorProgress">#FFD54F</color>
+    <color name="colorHeart">#EF5350</color>
+
+    <!-- Backgrounds -->
+    <color name="colorBackground">#F7F8FC</color>
+    <color name="colorSurface">#FFFFFF</color>
+    <color name="colorCanvasBg">#FFFFFF</color>
+    <color name="colorCardBorder">#E8E8EE</color>
+
+    <!-- Text -->
+    <color name="colorTextDark">#2E2E2E</color>
+    <color name="colorTextGrey">#7A7A7A</color>
+    <color name="colorTextLight">#B0B0B0</color>
+    <color name="colorOptionText">#3C3C3C</color>
+
+    <!-- Button Colors -->
+    <color name="colorButtonBlue">#4A90E2</color>
+    <color name="colorUndoButton">#E8E0FF</color>
+    <color name="colorUndoButtonText">#7B61FF</color>
+    <color name="colorClearButton">#FFEBEE</color>
+    <color name="colorClearButtonText">#EF5350</color>
+
+    <!-- Pastel / Decorative -->
+    <color name="colorPastelPink">#FFD1DC</color>
+    <color name="colorPastelGreen">#B8F0D0</color>
+    <color name="colorPastelYellow">#FFF3C4</color>
+    <color name="colorPastelPurple">#E8DEFF</color>
+    <color name="colorLightPurple">#F3E5F5</color>
+
+    <!-- Card Gradient Stops -->
+    <color name="colorGradientPurpleStart">#7B61FF</color>
+    <color name="colorGradientPurpleEnd">#A78BFA</color>
+    <color name="colorGradientOrangeStart">#FF8A65</color>
+    <color name="colorGradientOrangeEnd">#FFB347</color>
+    <color name="colorGradientTealStart">#4DB6AC</color>
+    <color name="colorGradientTealEnd">#80CBC4</color>
+    <color name="colorGradientPinkStart">#F48FB1</color>
+    <color name="colorGradientPinkEnd">#F8BBD0</color>
+    <color name="colorGradientBlueStart">#42A5F5</color>
+    <color name="colorGradientBlueEnd">#90CAF9</color>
+
+    <!-- Guide Path -->
+    <color name="colorGuidePath">#C5B8FF</color>
+
+    <!-- System -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>

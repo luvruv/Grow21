@@ -1,14 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --primary-color: #FACC15; /* Golden Yellow */
-  --primary-hover: #EAB308;
+  --primary-color: #F5C518; /* Yellow Accent */
+  --primary-hover: #E3B410;
   --bg-color: #0F172A; /* Deep Dark Blue/Black */
   --card-bg: #1E293B; /* Slightly lighter navy */
   --text-primary: #F8FAFC;
   --text-secondary: #94A3B8;
   --border-color: #334155;
-  --accent-glow: rgba(250, 204, 21, 0.15);
+  --accent-glow: rgba(245, 197, 24, 0.15);
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
   --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.6), 0 10px 10px -5px rgb(0 0 0 / 0.5);

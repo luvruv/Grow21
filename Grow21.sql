@@ -1,3 +1,6 @@
+DROP DATABASE IF EXISTS Grow21_DB;
+CREATE DATABASE Grow21_DB;
+
 USE Grow21_DB;
 
 /* 
@@ -26,8 +29,7 @@ CREATE TABLE Parent (
     ParentID  INT          PRIMARY KEY AUTO_INCREMENT,
     Name      VARCHAR(100) NOT NULL,
     -- [RUBRIC: CANDIDATE KEYS] Unique attributes that could serve as PKs
-    Email     VARCHAR(100) UNIQUE NOT NULL, 
-    Phone     VARCHAR(15)  NOT NULL
+    Email     VARCHAR(100) UNIQUE NOT NULL
 );
 
 CREATE TABLE School (
@@ -42,6 +44,8 @@ CREATE TABLE Child (
     Name               VARCHAR(100) NOT NULL,
     Age                INT          NOT NULL,
     BaselineSkillLevel VARCHAR(50)  NOT NULL,
+    Username           VARCHAR(100) UNIQUE,
+    Password           VARCHAR(255),
     FOREIGN KEY (ParentID) REFERENCES Parent(ParentID)
         ON DELETE CASCADE
 );
@@ -115,13 +119,28 @@ CREATE TABLE ProgressReport (
     ReportID      INT          PRIMARY KEY AUTO_INCREMENT,
     ChildID       INT          NOT NULL,
     GeneratedDate DATE         NOT NULL,
+    TotalSessions INT          DEFAULT 0,
     AccuracyRate  DECIMAL(5,2) NOT NULL,
-    FOREIGN KEY (ChildID) REFERENCES Child(ChildID)
+    FOREIGN KEY (ChildID) REFERENCES Child(ChildID) ON DELETE CASCADE
 );
 
-INSERT INTO Parent VALUES (1, 'Sunita Sharma', 'sunita@gmail.com', '9876543210');
-INSERT INTO Parent VALUES (2, 'Rakesh Mehta',  'rakesh@gmail.com', '9812345678');
-INSERT INTO Parent VALUES (3, 'Priya Singh',   'priya@gmail.com',  '9898765432');
+CREATE TABLE User (
+    UserID       INT PRIMARY KEY AUTO_INCREMENT,
+    Email        VARCHAR(100) UNIQUE NOT NULL,
+    Password     VARCHAR(255) NOT NULL,
+    Role         ENUM('Admin', 'Parent', 'Teacher') NOT NULL,
+    ParentID     INT NULL,
+    EducatorID   INT NULL,
+    FOREIGN KEY (ParentID) REFERENCES Parent(ParentID) ON DELETE CASCADE,
+    FOREIGN KEY (EducatorID) REFERENCES Educator(EducatorID) ON DELETE CASCADE
+);
+
+INSERT INTO Parent VALUES (1, 'Sunita Sharma', 'sunita@gmail.com');
+INSERT INTO Parent VALUES (2, 'Rakesh Mehta',  'rakesh@gmail.com');
+INSERT INTO Parent VALUES (3, 'Priya Singh',   'priya@gmail.com');
+INSERT INTO Parent VALUES (4, 'Amit Verma',    'amit@gmail.com');
+INSERT INTO Parent VALUES (5, 'Sneha Kapoor',  'sneha@gmail.com');
+INSERT INTO Parent VALUES (6, 'Rohit Das',     'rohit@gmail.com');
 
 SELECT * FROM Parent;
 
@@ -130,9 +149,16 @@ INSERT INTO School VALUES (2, 'Sunshine Learning Center',  'Mumbai');
 
 SELECT * FROM School;
 
-INSERT INTO Child VALUES (1, 1, 'Aryan Sharma', 8,  'Beginner');
-INSERT INTO Child VALUES (2, 2, 'Riya Mehta',   10, 'Intermediate');
-INSERT INTO Child VALUES (3, 3, 'Dev Singh',    7,  'Beginner');
+INSERT INTO Child VALUES (1, 1, 'Aryan Sharma', 8,  'Beginner', 'aryan1', 'pass123');
+INSERT INTO Child VALUES (2, 2, 'Riya Mehta',   10, 'Intermediate', 'riya2', 'pass123');
+INSERT INTO Child VALUES (3, 3, 'Dev Singh',    7,  'Beginner', 'dev3', 'pass123');
+INSERT INTO Child VALUES (4, 4, 'Aarav Verma',  6,  'Beginner', 'aarav4', 'pass123');
+INSERT INTO Child VALUES (5, 5, 'Kavya Kapoor', 9,  'Intermediate', 'kavya5', 'pass123');
+INSERT INTO Child VALUES (6, 6, 'Ishaan Das',   11, 'Advanced', 'ishaan6', 'pass123');
+INSERT INTO Child VALUES (7, 1, 'Myra Sharma',  7,  'Beginner', 'myra7', 'pass123');
+INSERT INTO Child VALUES (8, 2, 'Vivaan Mehta', 5,  'Beginner', 'vivaan8', 'pass123');
+INSERT INTO Child VALUES (9, 3, 'Diya Singh',   8,  'Intermediate', 'diya9', 'pass123');
+INSERT INTO Child VALUES (10, 4, 'Kabir Verma', 10, 'Advanced', 'kabir10', 'pass123');
 
 SELECT * FROM Child;
 
@@ -149,6 +175,14 @@ INSERT INTO Child_Educator VALUES (1, 2);
 INSERT INTO Child_Educator VALUES (2, 1);
 -- Dev is taught by Deepa
 INSERT INTO Child_Educator VALUES (3, 3);
+-- Additional children assignments
+INSERT INTO Child_Educator VALUES (4, 1);
+INSERT INTO Child_Educator VALUES (5, 2);
+INSERT INTO Child_Educator VALUES (6, 3);
+INSERT INTO Child_Educator VALUES (7, 1);
+INSERT INTO Child_Educator VALUES (8, 1);
+INSERT INTO Child_Educator VALUES (9, 2);
+INSERT INTO Child_Educator VALUES (10, 3);
 
 SELECT * FROM Child_Educator;
 
@@ -190,11 +224,33 @@ INSERT INTO Attempt VALUES (9, 5, 302, TRUE,  2.8, 5);
 
 SELECT * FROM Attempt;
 
-INSERT INTO ProgressReport VALUES (1, 1, '2026-03-15', 66.67);
-INSERT INTO ProgressReport VALUES (2, 2, '2026-03-15', 100.00);
-INSERT INTO ProgressReport VALUES (3, 3, '2026-03-15', 0.00);
+INSERT INTO User (Email, Password, Role, ParentID, EducatorID) VALUES 
+('admin@grow21.com', 'admin123', 'Admin', NULL, NULL),
+('sunita@gmail.com', 'pass123', 'Parent', 1, NULL),
+('rakesh@gmail.com', 'pass123', 'Parent', 2, NULL),
+('priya@gmail.com', 'pass123', 'Parent', 3, NULL),
+('amit@gmail.com', 'pass123', 'Parent', 4, NULL),
+('sneha@gmail.com', 'pass123', 'Parent', 5, NULL),
+('rohit@gmail.com', 'pass123', 'Parent', 6, NULL),
+('ananya@school.com', 'pass123', 'Teacher', NULL, 1),
+('vikram@school.com', 'pass123', 'Teacher', NULL, 2),
+('deepa@school.com', 'pass123', 'Teacher', NULL, 3);
 
-SELECT * FROM ProgressReport;
+CREATE VIEW ProgressView AS
+SELECT 
+    c.ChildID,
+    c.Name AS ChildName,
+    COUNT(a.AttemptID) AS TotalAttempts,
+    SUM(CASE WHEN a.IsCorrect = 1 THEN 1 ELSE 0 END) AS CorrectAttempts,
+    IFNULL(ROUND(SUM(CASE WHEN a.IsCorrect = 1 THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(a.AttemptID), 0), 2), 0) AS Accuracy
+FROM Child c
+LEFT JOIN Session s ON c.ChildID = s.ChildID
+LEFT JOIN Attempt a ON s.SessionID = a.SessionID
+GROUP BY c.ChildID, c.Name;
+
+-- Remove static ProgressReport inserts and let them be generated dynamically or stored via the procedure.
+-- We can initialize an empty ProgressReport, or just let the stored procedure handle it.
+SELECT * FROM User;
 
 SELECT 'Parent' AS TableName, COUNT(*) AS TotalRows FROM Parent
 UNION ALL
@@ -381,21 +437,24 @@ BEGIN
  
     -- 1. Calculate Summary Stats
     SELECT 
-        COUNT(DISTINCT SessionID), 
-        ROUND(SUM(IsCorrect) * 100.0 / COUNT(AttemptID), 2)
+        COUNT(DISTINCT s.SessionID), 
+        IFNULL(ROUND(SUM(a.IsCorrect) * 100.0 / NULLIF(COUNT(a.AttemptID), 0), 2), 0)
     INTO v_sessions, v_accuracy
-    FROM Attempt a
-    JOIN Session s ON a.SessionID = s.SessionID
+    FROM Session s
+    LEFT JOIN Attempt a ON a.SessionID = s.SessionID
     WHERE s.ChildID = p_ChildID;
  
-    -- 2. Insert a new progress report record for history
-    INSERT INTO ProgressReport (ChildID, GeneratedDate, AccuracyRate)
-    VALUES (p_ChildID, CURDATE(), COALESCE(v_accuracy, 0));
+    -- 2. Insert a new progress report record for history dynamically
+    IF v_sessions > 0 THEN
+        INSERT INTO ProgressReport (ChildID, GeneratedDate, TotalSessions, AccuracyRate)
+        VALUES (p_ChildID, CURDATE(), v_sessions, COALESCE(v_accuracy, 0));
+    END IF;
  
     -- 3. RETURN RESULT SET 1: Summary Stats (For Dashboard/Profile)
     SELECT 
         COALESCE(v_sessions, 0) AS TotalSessions, 
         COALESCE(v_accuracy, 0) AS AverageAccuracy,
+        COALESCE(v_accuracy, 0) AS OverallCompletion,
         (SELECT Name FROM Child WHERE ChildID = p_ChildID) AS ChildName;
 
     -- 4. RETURN RESULT SET 2: Session History
@@ -407,11 +466,12 @@ BEGIN
     JOIN Module  m ON l.ModuleID = m.ModuleID
     LEFT JOIN Attempt a ON a.SessionID = s.SessionID
     WHERE s.ChildID = p_ChildID
-    GROUP BY s.SessionID, s.SessionDate, l.LessonTitle, m.ModuleName;
+    GROUP BY s.SessionID, s.SessionDate, l.LessonTitle, m.ModuleName
+    ORDER BY s.SessionDate DESC;
 END $$
  
 DELIMITER ;
- 
+
 -- How to CALL the procedure:
 CALL GetChildProgressReport(1);   -- Run for Aryan (ChildID=1)
 CALL GetChildProgressReport(2);   -- Run for Riya  (ChildID=2)
@@ -419,13 +479,13 @@ CALL GetChildProgressReport(2);   -- Run for Riya  (ChildID=2)
 -- Transaction 1: Enroll a new child (all 3 steps must succeed)
 START TRANSACTION;
  
-INSERT INTO Parent (Name, Email, Phone)
-VALUES ('Meera Gupta', 'meera@gmail.com', '9900112233');
+INSERT INTO Parent (Name, Email)
+VALUES ('Meera Gupta', 'meera@gmail.com');
  
 SET @new_parent_id = LAST_INSERT_ID();
  
-INSERT INTO Child (ParentID, Name, Age, BaselineSkillLevel)
-VALUES (@new_parent_id, 'Rohan Gupta', 9, 'Beginner');
+INSERT INTO Child (ParentID, Name, Age, BaselineSkillLevel, Username, Password)
+VALUES (@new_parent_id, 'Rohan Gupta', 9, 'Beginner', 'rohan_g', 'pass123');
  
 SET @new_child_id = LAST_INSERT_ID();
  
@@ -455,3 +515,4 @@ ROLLBACK;
  
 -- Verify rollback worked:
 SELECT * FROM School;   -- Test School is GONE
+
