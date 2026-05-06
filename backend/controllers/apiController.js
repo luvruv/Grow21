@@ -71,12 +71,15 @@ exports.forgotPassword = (req, res) => {
   });
 };
 
-exports.resetPassword = (req, res) => {
-  const { email, newPassword } = req.body;
-  db.query('UPDATE `User` SET Password = ? WHERE Username = ?', [newPassword, email], (err, results) => {
+exports.getChildAccuracy = (req, res) => {
+  const childId = req.params.id;
+  const query = `SELECT IFNULL(ROUND(SUM(a.IsCorrect) * 100.0 / NULLIF(COUNT(a.AttemptID), 0), 0) AS Accuracy
+                 FROM Session s JOIN Attempt a ON s.SessionID = a.SessionID
+                 WHERE s.ChildID = ?`;
+  db.query(query, [childId], (err, results) => {
     if (err) return res.status(500).json({ error: err.message });
-    if (results.affectedRows === 0) return res.status(404).json({ message: 'User not found' });
-    res.json({ message: 'Password has been reset successfully. You can now login.' });
+    const accuracy = results[0] && results[0].Accuracy !== null ? results[0].Accuracy : 0;
+    res.json({ childId, accuracy });
   });
 };
 
@@ -447,11 +450,12 @@ exports.addFeedback = (req, res) => {
   );
 };
 
-// 7. App Sync APIs
 exports.appSession = (req, res) => {
-  const { childId, gameType, score, total, duration, isCompleted } = req.body;
-
+  const { childId, gameType, score, total, duration } = req.body;
+  
+  // Map Android gameType to CRM LessonID
   let lessonId = 1;
+  
   if (gameType === 'Trace Lines') lessonId = 1;
   else if (gameType === 'Draw Shapes') lessonId = 2;
   else if (gameType === 'Free Draw') lessonId = 3;
@@ -461,47 +465,56 @@ exports.appSession = (req, res) => {
   else if (gameType === 'Drag and Match') lessonId = 7;
 
   const actualDuration = duration || 10;
+  const totalCount = total || 0;
+  const correctCount = score || 0;
+  const incorrectCount = totalCount - correctCount;
+  
+  const isCompleted = (totalCount > 0) ? 1 : 0;
 
   const sessionQuery = 'INSERT INTO Session (ChildID, LessonID, SessionDate, Duration, IsCompleted) VALUES (?, ?, CURDATE(), ?, ?)';
-
-  db.query(sessionQuery, [childId, lessonId, actualDuration, isCompleted ? 1 : 0], (err, sessionRes) => {
+  
+  db.query(sessionQuery, [childId, lessonId, actualDuration, isCompleted], (err, sessionRes) => {
     if (err) return res.status(500).json({ error: err.message });
-
+    
     const sessionId = sessionRes.insertId;
-    const correctCount = score || 0;
-    const incorrectCount = (total || 0) - correctCount;
-    const totalAttempts = correctCount + incorrectCount;
-
-    if (totalAttempts === 0) {
+    
+    if (totalCount === 0) {
       return res.status(201).json({ message: 'Session added without attempts', sessionId });
     }
 
-    // Insert one Question per Attempt (must match the Session's Lesson — enforced by trigger).
-    const questionRows = [];
-    for (let i = 0; i < totalAttempts; i++) {
-      questionRows.push([lessonId, `Auto Q${i + 1} for session ${sessionId}`, null]);
-    }
-
-    db.query(
-      'INSERT INTO Question (LessonID, QuestionText, CorrectAnswer) VALUES ?',
-      [questionRows],
-      (errQ, qRes) => {
-        if (errQ) return res.status(500).json({ error: errQ.message });
-
-        const firstQid = qRes.insertId;
-        const attempts = [];
-        for (let i = 0; i < correctCount;   i++) attempts.push([sessionId, firstQid + i,                  1, 3.0]);
-        for (let i = 0; i < incorrectCount; i++) attempts.push([sessionId, firstQid + correctCount + i,    0, 5.0]);
-
-        db.query(
-          'INSERT INTO Attempt (SessionID, QuestionID, IsCorrect, ResponseTime) VALUES ?',
-          [attempts],
-          (errA) => {
-            if (errA) return res.status(500).json({ error: errA.message });
-            res.status(201).json({ message: 'Session and Attempts synced successfully' });
-          }
-        );
+    // Generate Attempt rows so the CRM calculates Accuracy correctly
+    // We must use valid QuestionIDs that belong to this LessonID to satisfy the trigger
+    db.query('SELECT QuestionID FROM Question WHERE LessonID = ?', [lessonId], (errQ, questions) => {
+      if (errQ || questions.length === 0) {
+        return res.status(201).json({ message: 'Session added (no questions found for attempts)', sessionId });
       }
-    );
+
+      let attempts = [];
+      let qIndex = 0;
+      for (let i = 0; i < correctCount; i++) {
+        const qId = questions[qIndex % questions.length].QuestionID;
+        attempts.push([sessionId, qId, 1, 3.0]);
+        qIndex++;
+      }
+      for (let i = 0; i < incorrectCount; i++) {
+        const qId = questions[qIndex % questions.length].QuestionID;
+        attempts.push([sessionId, qId, 0, 5.0]);
+        qIndex++;
+      }
+
+      const attemptQuery = 'INSERT INTO Attempt (SessionID, QuestionID, IsCorrect, ResponseTime) VALUES ?';
+      db.query(attemptQuery, [attempts], (err2) => {
+        if (err2) return res.status(500).json({ error: err2.message });
+        
+        const accuracyPct = Math.round((correctCount / totalCount) * 100);
+        res.status(201).json({ 
+          message: 'Session and Attempts synced successfully',
+          sessionId,
+          isCompleted,
+          accuracy: accuracyPct
+        });
+      });
+    });
   });
 };
+

@@ -17,8 +17,8 @@ const Dashboard = ({ currentUser, activeChild }) => {
     if (currentUser?.role === 'Parent' && activeChild) {
       // Fetch child specific data
       Promise.all([
-        fetch(`http://localhost:5000/api/progress/report/${activeChild.ChildID}`).then(r => r.json()),
-        fetch(`http://localhost:5000/api/sessions/${activeChild.ChildID}`).then(r => r.json())
+        fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/progress/report/${activeChild.ChildID}`).then(r => r.json()),
+        fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/sessions/${activeChild.ChildID}`).then(r => r.json())
       ]).then(([progressData, sessionsData]) => {
         if (Array.isArray(progressData) && progressData.length > 0) {
           setChildProgress(progressData[0]);
@@ -33,7 +33,7 @@ const Dashboard = ({ currentUser, activeChild }) => {
       });
     } else {
       // General dashboard for Teachers/Admins
-      let url = 'http://localhost:5000/api/dashboard';
+      let url = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/dashboard`;
       if (currentUser && currentUser.role !== 'Admin') {
         url += `?role=${currentUser.role}&refId=${currentUser.refId}`;
       }

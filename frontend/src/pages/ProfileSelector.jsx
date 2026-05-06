@@ -6,7 +6,7 @@ const ProfileSelector = ({ currentUser, onSelectChild }) => {
 
   useEffect(() => {
     setLoading(true);
-    let url = 'http://localhost:5000/api/children/details';
+    let url = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/children/details`;
     if (currentUser && currentUser.role !== 'Admin') {
       url += `?role=${currentUser.role}&refId=${currentUser.refId}`;
     }

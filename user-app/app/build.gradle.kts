@@ -17,7 +17,7 @@ android {
         
         // Backend server IP — change this when switching networks
         // Use "10.0.2.2" for Android Emulator, or your computer's Wi-Fi IP for physical device
-        buildConfigField("String", "BACKEND_IP", "\"10.7.3.105\"")
+        buildConfigField("String", "BACKEND_IP", "\"10.7.25.202\"")
     }
     
     buildFeatures {
@@ -47,6 +47,8 @@ dependencies {
     implementation(libs.cardview)
     implementation(libs.recyclerview)
     implementation(libs.gson)
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

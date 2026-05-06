@@ -9,7 +9,7 @@ const Progress = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/progress/report/${childId}`)
+    fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/progress/report/${childId}`)
       .then(res => res.json())
       .then(data => {
         let prog = null;

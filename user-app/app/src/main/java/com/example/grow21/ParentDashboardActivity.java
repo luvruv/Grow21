@@ -222,7 +222,19 @@ public class ParentDashboardActivity extends AppCompatActivity {
             float overallAccuracy = totalAttempted > 0
                     ? ((float) totalCorrect / totalAttempted) * 100 : 0;
 
-            tvTotalAttempted.setText(getString(R.string.total_attempted_format, totalAttempted));
+            // Show completion status: X/7 games played
+            int playedCount = dbHelper.getPlayedCategoryCount();
+            int totalGames = DatabaseHelper.TOTAL_GAME_CATEGORIES;
+            String completionText;
+            if (playedCount >= totalGames) {
+                completionText = getString(R.string.total_attempted_format, totalAttempted) 
+                    + " ✅ All " + totalGames + " games completed!";
+            } else {
+                completionText = getString(R.string.total_attempted_format, totalAttempted) 
+                    + " (" + playedCount + "/" + totalGames + " games played)";
+            }
+            tvTotalAttempted.setText(completionText);
+
             tvOverallAccuracy.setText(String.format(Locale.getDefault(),
                     getString(R.string.overall_accuracy_format), overallAccuracy));
 
@@ -237,6 +249,8 @@ public class ParentDashboardActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        // Sync any offline sessions to the backend before showing data
+        dbHelper.syncUnsyncedSessions();
         // Refresh data when returning to this screen
         loadStreakData();
         loadCalendarMonth();

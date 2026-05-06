@@ -284,7 +284,7 @@ BEGIN
     SELECT
         COUNT(DISTINCT s.SessionID),
         IFNULL(ROUND(SUM(a.IsCorrect) * 100.0
-            / NULLIF(COUNT(a.AttemptID), 0), 2), 0)
+        / NULLIF(COUNT(a.AttemptID), 0), 0), 0)
     INTO v_sessions, v_accuracy
     FROM Session s
     LEFT JOIN Attempt a ON a.SessionID = s.SessionID
@@ -317,7 +317,7 @@ BEGIN
     IF p_Role = 'Parent' THEN
         SELECT COUNT(DISTINCT c.ChildID)            AS ChildCount,
                COUNT(DISTINCT s.SessionID)          AS SessionCount,
-               IFNULL(ROUND(AVG(a.IsCorrect)*100,2),0) AS OverallAccuracy
+               IFNULL(ROUND(AVG(a.IsCorrect)*100,0),0) AS OverallAccuracy
         FROM Child c
         LEFT JOIN Session s ON c.ChildID = s.ChildID
         LEFT JOIN Attempt a ON s.SessionID = a.SessionID
@@ -325,7 +325,7 @@ BEGIN
     ELSEIF p_Role = 'Teacher' THEN
         SELECT COUNT(DISTINCT ce.ChildID)           AS ChildCount,
                COUNT(DISTINCT s.SessionID)          AS SessionCount,
-               IFNULL(ROUND(AVG(a.IsCorrect)*100,2),0) AS OverallAccuracy
+               IFNULL(ROUND(AVG(a.IsCorrect)*100,0),0) AS OverallAccuracy
         FROM Child_Educator ce
         JOIN Child c        ON ce.ChildID   = c.ChildID
         LEFT JOIN Session s ON c.ChildID    = s.ChildID
@@ -406,7 +406,7 @@ DELIMITER ;
 -- Per-child average accuracy across all attempts.
 CREATE OR REPLACE VIEW ProgressView AS
 SELECT s.ChildID,
-       ROUND(AVG(a.IsCorrect) * 100, 2) AS Accuracy
+       ROUND(AVG(a.IsCorrect) * 100, 0) AS Accuracy
 FROM Session s
 JOIN Attempt a ON s.SessionID = a.SessionID
 GROUP BY s.ChildID;
@@ -419,7 +419,7 @@ SELECT
     CURDATE()                                    AS GeneratedDate,
     COUNT(DISTINCT s.SessionID)                  AS TotalSessions,
     IFNULL(ROUND(SUM(a.IsCorrect) * 100.0
-        / NULLIF(COUNT(a.AttemptID), 0), 2), 0)  AS AccuracyRate
+        / NULLIF(COUNT(a.AttemptID), 0), 0), 0)  AS AccuracyRate
 FROM Session s
 LEFT JOIN Attempt a ON s.SessionID = a.SessionID
 GROUP BY s.ChildID;
@@ -434,7 +434,7 @@ SELECT
     c.Name AS ChildName,
     TIMESTAMPDIFF(YEAR, c.DateOfBirth, CURDATE()) AS Age,
     COUNT(DISTINCT s.SessionID) AS TotalSessions,
-    IFNULL(ROUND(AVG(a.IsCorrect) * 100, 2), 0) AS Accuracy
+    IFNULL(ROUND(AVG(a.IsCorrect) * 100, 0), 0) AS Accuracy
 FROM Parent p
 JOIN `User` u       ON u.UserID = p.ParentID
 JOIN Child c        ON p.ParentID = c.ParentID
@@ -452,7 +452,7 @@ SELECT
     TIMESTAMPDIFF(YEAR, c.DateOfBirth, CURDATE()) AS Age,
     p.Name AS ParentName,
     COUNT(DISTINCT s.SessionID) AS TotalSessions,
-    IFNULL(ROUND(AVG(a.IsCorrect) * 100, 2), 0) AS Accuracy
+    IFNULL(ROUND(AVG(a.IsCorrect) * 100, 0), 0) AS Accuracy
 FROM Educator e
 JOIN Child_Educator ce ON e.EducatorID = ce.EducatorID
 JOIN Child c           ON ce.ChildID   = c.ChildID
@@ -483,7 +483,7 @@ GROUP BY c.ChildID, c.Name, s.SessionID, s.SessionDate, s.Duration, s.IsComplete
 -- Demographic-style alert views.
 CREATE OR REPLACE VIEW WeakStudents AS
 SELECT c.ChildID, c.Name AS ChildName, p.Name AS ParentName,
-       ROUND(AVG(a.IsCorrect) * 100, 2) AS AccuracyPercent
+       ROUND(AVG(a.IsCorrect) * 100, 0) AS AccuracyPercent
 FROM Child c
 JOIN Parent p   ON c.ParentID  = p.ParentID
 JOIN Session s  ON c.ChildID   = s.ChildID
@@ -493,7 +493,7 @@ HAVING AccuracyPercent < 50;
 
 CREATE OR REPLACE VIEW TopPerformers AS
 SELECT c.ChildID, c.Name AS ChildName, p.Name AS ParentName,
-       ROUND(AVG(a.IsCorrect) * 100, 2) AS AccuracyPercent
+       ROUND(AVG(a.IsCorrect) * 100, 0) AS AccuracyPercent
 FROM Child c
 JOIN Parent p   ON c.ParentID  = p.ParentID
 JOIN Session s  ON c.ChildID   = s.ChildID

@@ -16,10 +16,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import com.example.grow21.api.ApiClient;
+import com.example.grow21.api.Grow21ApiService;
+import com.example.grow21.api.SyncRequest;
+import com.example.grow21.api.SyncResponse;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "grow21.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     // User table
     private static final String TABLE_USER = "User";
@@ -84,7 +92,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + COL_SESSION_GAME_TYPE + " TEXT NOT NULL, "
                 + COL_SESSION_SCORE + " INTEGER NOT NULL, "
                 + COL_SESSION_TOTAL + " INTEGER NOT NULL, "
-                + COL_SESSION_DATE + " TEXT NOT NULL)";
+                + COL_SESSION_DATE + " TEXT NOT NULL, "
+                + "is_synced INTEGER DEFAULT 0)";
 
         String createPerformanceTable = "CREATE TABLE " + TABLE_PERFORMANCE + " ("
                 + COL_PERF_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -101,11 +110,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_CHILD);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_SESSION);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_PERFORMANCE);
-        onCreate(db);
+        if (oldVersion < 3) {
+            db.execSQL("ALTER TABLE " + TABLE_SESSION + " ADD COLUMN is_synced INTEGER DEFAULT 0");
+        } else {
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_CHILD);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_SESSION);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_PERFORMANCE);
+            onCreate(db);
+        }
     }
 
     // ==================== Child Methods ====================
@@ -157,39 +170,59 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COL_SESSION_TOTAL, total);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         values.put(COL_SESSION_DATE, sdf.format(new Date()));
+        values.put("is_synced", 0);
         
         long result = db.insert(TABLE_SESSION, null, values);
 
-        // SYNC WITH NODE.JS BACKEND FOR CRM
-        new Thread(() -> {
-            try {
-                // Get dynamic ChildID from SharedPreferences set during LoginActivity
-                int childId = 1;
-                if (mContext != null) {
-                    android.content.SharedPreferences prefs = mContext.getSharedPreferences("grow21_prefs", Context.MODE_PRIVATE);
-                    childId = prefs.getInt("SERVER_CHILD_ID", 1);
-                }
-                
-                java.net.URL url = new java.net.URL("http://" + BuildConfig.BACKEND_IP + ":5000/api/app-sync");
-                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json");
-                conn.setDoOutput(true);
-                
-                String json = "{\"childId\":" + childId + ",\"gameType\":\"" + gameType + "\",\"score\":" + score + ",\"total\":" + total + "}";
-                java.io.OutputStream os = conn.getOutputStream();
-                os.write(json.getBytes());
-                os.flush();
-                os.close();
-                
-                int responseCode = conn.getResponseCode();
-                System.out.println("Backend Sync Response: " + responseCode);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }).start();
+        syncUnsyncedSessions();
 
         return result;
+    }
+
+    public void syncUnsyncedSessions() {
+        int childId = 1;
+        if (mContext != null) {
+            android.content.SharedPreferences prefs = mContext.getSharedPreferences("grow21_prefs", Context.MODE_PRIVATE);
+            childId = prefs.getInt("SERVER_CHILD_ID", 1);
+        }
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(TABLE_SESSION, null, "is_synced = 0", null, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                Grow21ApiService apiService = ApiClient.getClient().create(Grow21ApiService.class);
+                do {
+                    long sessionId = cursor.getLong(cursor.getColumnIndexOrThrow(COL_SESSION_ID));
+                    String gameType = cursor.getString(cursor.getColumnIndexOrThrow(COL_SESSION_GAME_TYPE));
+                    int score = cursor.getInt(cursor.getColumnIndexOrThrow(COL_SESSION_SCORE));
+                    int total = cursor.getInt(cursor.getColumnIndexOrThrow(COL_SESSION_TOTAL));
+
+                    SyncRequest request = new SyncRequest(childId, gameType, score, total, 10);
+                    apiService.syncSession(request).enqueue(new Callback<SyncResponse>() {
+                        @Override
+                        public void onResponse(Call<SyncResponse> call, Response<SyncResponse> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                SQLiteDatabase wdb = DatabaseHelper.this.getWritableDatabase();
+                                ContentValues cv = new ContentValues();
+                                cv.put("is_synced", 1);
+                                wdb.update(TABLE_SESSION, cv, COL_SESSION_ID + "=?", new String[]{String.valueOf(sessionId)});
+                                System.out.println("Sync Success for offline session: " + sessionId);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<SyncResponse> call, Throwable t) {
+                            System.out.println("Backend Sync Error: " + t.getMessage());
+                        }
+                    });
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (cursor != null) cursor.close();
+        }
     }
 
     public List<Session> getAllSessions() {
@@ -246,6 +279,59 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cursor.close();
         }
         return progressList;
+    }
+
+    // ==================== Completion & Accuracy Methods ====================
+
+    /**
+     * Returns the total number of distinct game categories that have been played.
+     * Used to determine if ALL games are complete.
+     */
+    public int getPlayedCategoryCount() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+            "SELECT COUNT(DISTINCT " + COL_SESSION_GAME_TYPE + ") FROM " + TABLE_SESSION, null);
+        int count = 0;
+        if (cursor != null && cursor.moveToFirst()) {
+            count = cursor.getInt(0);
+            cursor.close();
+        }
+        return count;
+    }
+
+    /**
+     * Total number of distinct game types available in the app.
+     * If the child has played all of these, they are "fully completed".
+     */
+    public static final int TOTAL_GAME_CATEGORIES = 7;
+    // Trace Lines, Draw Shapes, Free Draw, Image-based MCQ, 
+    // Color Sorting, Memory Flip, Drag and Match
+
+    /**
+     * Returns true only when ALL game categories have been played at least once.
+     */
+    public boolean isAllGamesCompleted() {
+        return getPlayedCategoryCount() >= TOTAL_GAME_CATEGORIES;
+    }
+
+    /**
+     * Calculates overall accuracy from QuestionPerformance table.
+     * Only counts categories that have graded questions (excludes free_draw).
+     */
+    public float getOverallAccuracy() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT COUNT(*) as total, SUM(" + COL_PERF_IS_CORRECT + ") as correct FROM " + TABLE_PERFORMANCE;
+        Cursor cursor = db.rawQuery(query, null);
+        float accuracy = 0;
+        if (cursor != null && cursor.moveToFirst()) {
+            int total = cursor.getInt(cursor.getColumnIndexOrThrow("total"));
+            int correct = cursor.getInt(cursor.getColumnIndexOrThrow("correct"));
+            if (total > 0) {
+                accuracy = Math.round(((float) correct / total) * 100);
+            }
+            cursor.close();
+        }
+        return (int) accuracy;
     }
 
     // ==================== Streak / Calendar Methods ====================
